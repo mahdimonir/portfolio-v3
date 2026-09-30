@@ -7,8 +7,6 @@ import React, {
   cloneElement,
   ReactNode,
   ReactElement,
-  useState,
-  useEffect,
 } from "react";
 import {
   motion,
@@ -40,6 +38,44 @@ interface TextRevealProps {
   scrub?: boolean;
 }
 
+interface ScrubWordProps {
+  word: string;
+  scrollYProgress: MotionValue<number>;
+  wordIndex: number;
+  staggerDuration: number;
+}
+
+const ScrubWord = ({
+  word,
+  scrollYProgress,
+  wordIndex,
+  staggerDuration,
+}: ScrubWordProps) => {
+  const start = wordIndex * staggerDuration;
+  const end = start + 0.25;
+
+  const y: MotionValue<string> = useTransform(
+    scrollYProgress,
+    [start, end],
+    ["110%", "0%"]
+  );
+
+  const opacity: MotionValue<number> = useTransform(
+    scrollYProgress,
+    [start, end],
+    [0, 1]
+  );
+
+  return (
+    <motion.span
+      style={{ y, opacity }}
+      className="inline-block will-change-transform"
+    >
+      {word}&nbsp;
+    </motion.span>
+  );
+};
+
 export const TextReveal: React.FC<TextRevealProps> = ({
   children,
   className,
@@ -57,19 +93,9 @@ export const TextReveal: React.FC<TextRevealProps> = ({
   /* ---------------- IN VIEW ---------------- */
 
   const isInView = useInView(ref, {
-    once: false,
+    once: once && !repeat,
     margin: "-10% 0px",
   });
-
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  useEffect(() => {
-    if (isInView && once && !hasAnimated) {
-      setHasAnimated(true);
-    }
-  }, [isInView, once, hasAnimated]);
-
-  const shouldAnimate = once ? hasAnimated : isInView;
 
   /* ---------------- SCROLL SCRUB ---------------- */
 
@@ -119,34 +145,18 @@ export const TextReveal: React.FC<TextRevealProps> = ({
         return words.map((word, i) => {
           const wordIndex = globalIndex++;
 
-          /* stagger offset for scrub mode */
-          const start = wordIndex * staggerDuration;
-          const end = start + 0.25;
-
-          const y: MotionValue<string> = useTransform(
-            scrollYProgress,
-            [start, end],
-            ["110%", "0%"]
-          );
-
-          const opacity: MotionValue<number> = useTransform(
-            scrollYProgress,
-            [start, end],
-            [0, 1]
-          );
-
           return (
             <span
               key={`${word}-${index}-${i}`}
               className="inline-block overflow-hidden align-bottom"
             >
               {scrub ? (
-                <motion.span
-                  style={{ y, opacity }}
-                  className="inline-block will-change-transform"
-                >
-                  {word}&nbsp;
-                </motion.span>
+                <ScrubWord
+                  word={word}
+                  scrollYProgress={scrollYProgress}
+                  wordIndex={wordIndex}
+                  staggerDuration={staggerDuration}
+                />
               ) : (
                 <motion.span
                   variants={wordVariants}
@@ -192,7 +202,7 @@ export const TextReveal: React.FC<TextRevealProps> = ({
       className={cn("inline", className)}
       variants={!scrub ? containerVariants : undefined}
       initial={!scrub ? "hidden" : undefined}
-      animate={!scrub ? (repeat ? (isInView ? "visible" : "hidden") : shouldAnimate ? "visible" : "hidden") : undefined}
+      animate={!scrub ? (isInView ? "visible" : "hidden") : undefined}
     >
       {wrapText(children)}
     </motion.div>

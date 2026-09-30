@@ -3,10 +3,10 @@
 
 import Scene3D from '@/components/Model'
 
-export default function Home() {
+export default function Scene() {
   return (
-    <main className="relative w-full min-h-[200vh]! bg-white">
+    <section className="relative w-full min-h-[200vh]! bg-black">
       <Scene3D />
-    </main>
+    </section>
   )
 }

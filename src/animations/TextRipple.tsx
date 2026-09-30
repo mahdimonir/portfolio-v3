@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView, Variants, useScroll, useTransform, MotionValue } from "framer-motion";
+import { motion, useInView, Variants, useScroll, useTransform, MotionValue, UseScrollOptions } from "framer-motion";
 
 interface TextRippleProps {
   text: string;
@@ -76,7 +76,7 @@ const TextRipple = ({
   
   // Logic: Use original settings for normal, modified settings for reverse
   const viewMargin = reverse ? "0px" : "-10% 0px";
-  const scrollOffset: any = reverse 
+  const scrollOffset: NonNullable<UseScrollOptions["offset"]> = reverse 
     ? ["start end", "end end"] 
     : ["start end", "end center"];
 

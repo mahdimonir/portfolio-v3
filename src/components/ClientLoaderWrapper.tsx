@@ -19,7 +19,10 @@ export default function ClientLoaderWrapper({
 
     // show loader ONLY on reload
     if (isReload) {
-      setShowLoader(true);
+      const frame = requestAnimationFrame(() => {
+        setShowLoader(true);
+      });
+      return () => cancelAnimationFrame(frame);
     }
   }, []);
 
